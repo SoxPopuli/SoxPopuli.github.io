@@ -2,7 +2,6 @@
   "name": "soxpopuli.github.io",
   "version": "1.0.0",
   "description": "website",
-  "main": "public/index.js",
   "scripts": {
     "test": "echo test"
   },
