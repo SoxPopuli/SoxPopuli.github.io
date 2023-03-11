@@ -70,6 +70,6 @@ view model =
     { title = "Application Title"
     , body =
         [ div []
-            [ text "New Application" ]
+            [ text "Test" ]
         ]
     }
