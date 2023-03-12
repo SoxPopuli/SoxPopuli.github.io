@@ -52,12 +52,7 @@ update msg model =
         UrlRequested urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    let 
-                        -- Convert redirected url to query to 
-                        -- allow client side routing
-                        newUrl = Debug.log "new url" { url | path = "?" ++ url.path }
-                    in
-                    ( model, Nav.pushUrl model.key (Url.toString newUrl) )
+                    ( model, Nav.pushUrl model.key (Url.toString url) )
 
                 Browser.External href ->
                     ( model, Nav.load href )
@@ -81,12 +76,14 @@ header =
             , "About"
             ]
 
+        -- Convert redirected url to query to 
+        -- allow client side routing
         buttons = 
             links |>
             List.map 
                 (\name ->
                     a 
-                        [ A.href ("/" ++ String.toLower name) 
+                        [ A.href ("?/" ++ String.toLower name) 
                         , A.class "nav-button"
                         ] 
                         [ text name 
