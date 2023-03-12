@@ -1,0 +1,37 @@
+html, body, main {
+    margin: 0px;
+    height: 100vh;
+}
+
+#header {
+    position: sticky;
+}
+
+#content {
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+    padding: 1em;
+}
+
+.nav-list {
+    display: flex;
+    flex-direction: row;
+    column-gap: 1em;
+
+    background: linear-gradient(black, white);
+
+    height: 4rem;
+
+    align-items: center;
+    justify-content: flex-start;
+
+    padding: 1em;
+
+    font-size: large;
+    font-family: sans-serif;
+
+    .nav-button {
+        text-decoration: none;
+    }
+}

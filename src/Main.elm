@@ -3,6 +3,9 @@ module Main exposing (main)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
+import Html.Attributes as A
+import Html.Events as E
+import Html.Lazy as Lazy
 import Url
 
 
@@ -65,11 +68,42 @@ subscriptions model =
     Sub.none
 
 
+header : Html Msg
+header =
+    let
+        links = 
+            [ "Home"
+            , "About"
+            ]
+
+        buttons = 
+            links |>
+            List.map 
+                (\name ->
+                    a 
+                        [ A.href ("/" ++ String.toLower name) 
+                        , A.class "nav-button"
+                        ] 
+                        [ text name 
+                        ]
+                )
+    in
+    div 
+        [ A.id "header" 
+        ] 
+        [ nav [ A.class "nav-list" ] buttons
+        ]
+
 view : Model -> Browser.Document Msg
 view model =
     { title = "Application Title"
     , body =
-        [ div []
-            [ text "Test" ]
+        [ main_ []
+            [ Lazy.lazy (\_ -> header) ()
+            , div 
+                [ A.id "content" ]
+                [ text "Test" 
+                ]
+            ]
         ]
     }
