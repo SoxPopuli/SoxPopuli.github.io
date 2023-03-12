@@ -52,7 +52,12 @@ update msg model =
         UrlRequested urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model, Nav.pushUrl model.key (Url.toString url) )
+                    let 
+                        -- Convert redirected url to query to 
+                        -- allow client side routing
+                        newUrl = Debug.log "new url" { url | path = "?" ++ url.path }
+                    in
+                    ( model, Nav.pushUrl model.key (Url.toString newUrl) )
 
                 Browser.External href ->
                     ( model, Nav.load href )
