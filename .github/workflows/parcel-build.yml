@@ -27,9 +27,7 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Builds static page files
-        run: |
-          npm install
-          npx parcel build public/index.html
+        run: npm run build
 
       - name: Upload built files
         uses: actions/upload-pages-artifact@v1
