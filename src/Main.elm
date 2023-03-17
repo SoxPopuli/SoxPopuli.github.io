@@ -63,8 +63,7 @@ init : flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url key =
     let
         session = Session.init key url
-        _ = Debug.log "url" url
-        route = Debug.log "route" (Router.route url)
+        route = (Router.route url)
 
     in
     ( fromRoute route session, Cmd.none )
