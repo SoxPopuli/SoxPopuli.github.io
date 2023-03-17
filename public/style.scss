@@ -1,12 +1,14 @@
 @use 'sass:math';
+@use 'styles/utils';
 
 html, body, main {
     margin: 0px;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 #header {
     position: sticky;
+    top: 0;
 }
 
 #content {
@@ -17,23 +19,19 @@ html, body, main {
 }
 
 .nav-list {
-    display: flex;
-    flex-direction: row;
-    // column-gap: 1em;
+    @include utils.flex-center(row);
+    justify-content: flex-start;
 
-    // background-color: #202020;
     background: linear-gradient(#000000, #202020 60%, #303030 95%);
 
-    // height: 4rem;
-
-    align-items: center;
-    justify-content: flex-start;
 
     padding-left: 1em;
     padding-right: 1em;
 
     font-size: large;
     font-family: sans-serif;
+
+    flex-wrap: wrap;
 
     .nav-button {
         $nav-width: 12ch;

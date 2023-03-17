@@ -4,6 +4,7 @@
   "description": "website",
   "scripts": {
     "test": "echo test",
+    "start": "parcel public/index.html -p 8000",
     "clean": "./clean.sh",
     "build": "./build.sh"
   },

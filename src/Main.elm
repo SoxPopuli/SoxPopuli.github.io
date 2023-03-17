@@ -8,6 +8,12 @@ import Html.Events as E
 import Html.Lazy as Lazy
 import Url
 
+import Router
+import Session exposing (Session)
+
+import Pages.About as About
+import Pages.Home as Home
+import Pages.NotFound as NotFound
 
 main : Program () Model Msg
 main =
@@ -20,47 +26,107 @@ main =
         , onUrlChange = UrlChanged
         }
 
+-- MODEL
 
-type alias Model =
-    { key : Nav.Key
-    , url : Url.Url
-    , property : String
-    }
+type Model 
+    = Home Home.Model
+    | About About.Model
+    | NotFound NotFound.Model
 
+fromRoute : Router.Route -> Session -> Model
+fromRoute route session =
+    case route of
+        Router.Home -> Home <| Home.init session
+        Router.About -> About <| About.init session
+        Router.NotFound -> NotFound <| NotFound.init session
+
+toSession : Model -> Session
+toSession model =
+    case model of
+        Home m -> m.session
+        About m -> m.session
+        NotFound m -> m.session
+
+updateSession : Model -> (Session -> Session) -> Model
+updateSession model fn =
+    let 
+        update_ m s = { m | session = s }
+    in
+    case model of
+        Home m -> Home (update_ m <| fn m.session)
+        About m -> About (update_ m <| fn m.session)
+        NotFound m -> NotFound (update_ m <| fn m.session)
+
+-- INIT
 
 init : flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
-    ( Model key url "modelInitialValue", Cmd.none )
+init _ url key =
+    let
+        session = Session.init key url
+        _ = Debug.log "url" url
+        route = Debug.log "route" (Router.route url)
 
+    in
+    ( fromRoute route session, Cmd.none )
+
+-- MSG
 
 type Msg
-    = Msg1
-    | Msg2
+    = GotHomeMsg Home.Msg
+    | GotAboutMsg About.Msg
+    | GotNotFoundMsg NotFound.Msg
     | UrlRequested Browser.UrlRequest
     | UrlChanged Url.Url
 
 
+-- UPDATE
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        Msg1 ->
-            ( model, Cmd.none )
+    case (model, msg) of
+        (Home subModel, GotHomeMsg subMsg) ->
+            Tuple.mapBoth
+                Home
+                (Cmd.map GotHomeMsg)
+                (Home.update subMsg subModel)
 
-        Msg2 ->
-            ( model, Cmd.none )
+        (About subModel, GotAboutMsg subMsg) ->
+            Tuple.mapBoth
+                About
+                (Cmd.map GotAboutMsg)
+                (About.update subMsg subModel)
 
-        UrlRequested urlRequest ->
+        (NotFound subModel, GotNotFoundMsg subMsg) ->
+            Tuple.mapBoth
+                NotFound
+                (Cmd.map GotNotFoundMsg)
+                (NotFound.update subMsg subModel)
+        
+        (_, UrlRequested urlRequest) ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model, Nav.pushUrl model.key (Url.toString url) )
+                    let
+                        session = toSession model
+                    in
+                    ( model, Nav.pushUrl session.key (Url.toString url) )
 
                 Browser.External href ->
                     ( model, Nav.load href )
 
-        UrlChanged url ->
-            ( { model | url = url }
+        (_, UrlChanged url) ->
+            let
+                session = toSession model
+                route =
+                    fromRoute
+                        (Router.route url)
+                        { session | url = url }
+            in
+            ( route
             , Cmd.none
             )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -96,6 +162,21 @@ header =
         [ nav [ A.class "nav-list" ] buttons
         ]
 
+-- VIEW
+
+viewPage : Model -> Html Msg
+viewPage model = 
+    case model of
+        Home m -> 
+            Html.map GotHomeMsg <|
+                Home.view m
+        About m -> 
+            Html.map GotAboutMsg <|
+                About.view m
+        NotFound m -> 
+            Html.map GotNotFoundMsg <|
+                NotFound.view m
+
 view : Model -> Browser.Document Msg
 view model =
     { title = "Application Title"
@@ -104,8 +185,7 @@ view model =
             [ Lazy.lazy (\_ -> header) ()
             , div 
                 [ A.id "content" ]
-                [ text "Test" 
-                ]
+                [ viewPage model ]
             ]
         ]
     }
