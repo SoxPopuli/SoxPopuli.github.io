@@ -8,17 +8,26 @@ import Url.Parser.Query as Query
 type Route 
     = Home
     | About
+    | Tools
     | NotFound
 
+fromQuery : Maybe String -> Route
+fromQuery query =
+    case query of
+        Just "home" -> Home
+        Just "about" -> About
+        Just "tools" -> Tools
+
+        _ -> NotFound
+
+parser : Parser.Parser (Route -> a) a
+parser =
+    oneOf
+        [ map fromQuery (Parser.top <?> Query.string "page")
+        , map Home Parser.top
+        ]
 
 route : Url.Url -> Route
 route url =
-    if url.path /= "/" then
-        NotFound
-    else
-    case url.query of
-        Nothing -> Home
-        Just "/home" -> Home
-        Just "/about" -> About
-        
-        _ -> NotFound
+    Parser.parse parser url
+    |> Maybe.withDefault NotFound

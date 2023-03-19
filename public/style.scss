@@ -1,40 +1,88 @@
 @use 'sass:math';
 @use 'styles/utils';
 
+// Colors                //////////////////////////////
+
+:root.dark {
+    --content-bg: hsl(0, 0%, 6%);
+    --content-fg: hsl(0, 0%, 100%);
+    --menu-bg: hsl(0, 0%, 15%);
+    --menu-fg: hsl(0, 0%, 100%);
+}
+
+:root.light {
+    --content-bg: white;
+    --content-fg: black;
+    --menu-bg: white;
+    --menu-fg: black;
+}
+
+
+// CSS Starts Here       //////////////////////////////
+$border-width: 1px;
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    font-family: sans-serif;
+
+    color: var(--content-fg);
+}
+
 html, body, main {
     margin: 0px;
     min-height: 100vh;
 }
 
+main {
+    display: flex;
+    flex-direction: column;
+}
+
 #header {
+    @include utils.flex(row);
+
     position: sticky;
     top: 0;
+
+    border-bottom: $border-width solid var(--menu-fg);
 }
 
 #content {
+    display: flex;
     overflow-y: scroll;
     overflow-x: hidden;
+    // padding: 1em;
+    flex-grow: 1;
 
-    padding: 1em;
+    background-color: var(--content-bg);
+
+    transition: 400ms;
+}
+
+@mixin gradient-bg($dir) {
+    background: linear-gradient(to $dir, #000000, #202020 60%, #303030 95%);
 }
 
 .nav-list {
     @include utils.flex-center(row);
     justify-content: flex-start;
 
-    background: linear-gradient(#000000, #202020 60%, #303030 95%);
+    // @include gradient-bg(bottom);
+    background-color: var(--menu-bg);
 
-
-    padding-left: 1em;
+    // padding-left: 1em;
     padding-right: 1em;
 
-    font-size: large;
-    font-family: sans-serif;
-
+    font-size: 14pt;
     flex-wrap: wrap;
 
+    $border: $border-width solid var(--menu-fg);
+    flex-grow: 1;
+
     .nav-button {
-        $nav-width: 12ch;
+        @include utils.button;
+
+        $nav-width: 9rem;
 
         display: flex;
         justify-content: center;
@@ -42,16 +90,77 @@ html, body, main {
         text-decoration: none;
         background-color: transparent;
         min-width: $nav-width;
-        min-height: math.div($nav-width, 2);
-        color: white;
+        min-height: 3rem;
+        color: var(--menu-fg);
+        font-weight: bold;
         
-        border-right: 1px solid white;
+        border-right: $border;
+        // border-left: $border;
+        // border-bottom: $border;
     }
 
     .nav-button:first-child {
-        border-left: 1px solid white;
+        // border-left: $border;
     }
+}
 
-    .nav-button:hover { background-color: rgba($color: dimgrey, $alpha: 0.2) }
-    .nav-button:active { background-color: rgba($color: dimgrey, $alpha: 1.0); }
+@mixin content-default($pad) {
+    padding: $pad;
+    flex-grow: 1;
+}
+
+button {
+    @include utils.button;
+    background-color: var(--menu-bg);
+    color: var(--menu-fg);
+}
+
+#theme-button {
+    border-left: $border-width solid var(--menu-fg);
+    padding: 0.6em;
+    max-width: 14ch;
+}
+
+// Page Specific CSS
+
+//  Home                 //////////////////////////////
+.home-container {
+    @include content-default(1em);
+}
+
+//  About                //////////////////////////////
+.about-container {
+    @include content-default(1em);
+}
+
+//  Not Found            //////////////////////////////
+.nf-container {
+    @include content-default(1em);
+}
+
+//  Tools                //////////////////////////////
+.tools-container {
+    @include content-default(0);
+    @include utils.flex(row);
+}
+
+.tools-sidebar {
+    @include utils.flex(column);
+    // @include gradient-bg(right);
+    background-color: var(--menu-bg);
+    color: var(--menu-fg);
+
+    width: 9rem;
+
+    border: $border-width solid var(--menu-fg);
+    border-top: none;
+    border-left: none;
+    button {
+        @include utils.button;
+        color: var(--menu-fg);
+        padding: 1em;
+        border-bottom: $border-width solid var(--menu-fg);
+        font-weight: bold;
+        font-size: medium;
+    }
 }

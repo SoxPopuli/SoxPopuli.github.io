@@ -7,13 +7,19 @@ import Html.Attributes as A
 import Html.Events as E
 import Html.Lazy as Lazy
 import Url
+import Json.Encode as Enc
 
 import Router
 import Session exposing (Session)
+import Ports
+import Theme exposing (Theme(..))
+
 
 import Pages.About as About
 import Pages.Home as Home
 import Pages.NotFound as NotFound
+import Pages.Tools as Tools
+
 
 main : Program () Model Msg
 main =
@@ -31,6 +37,7 @@ main =
 type Model 
     = Home Home.Model
     | About About.Model
+    | Tools Tools.Model
     | NotFound NotFound.Model
 
 fromRoute : Router.Route -> Session -> Model
@@ -39,12 +46,14 @@ fromRoute route session =
         Router.Home -> Home <| Home.init session
         Router.About -> About <| About.init session
         Router.NotFound -> NotFound <| NotFound.init session
+        Router.Tools -> Tools <| Tools.init session
 
 toSession : Model -> Session
 toSession model =
     case model of
         Home m -> m.session
         About m -> m.session
+        Tools m -> m.session
         NotFound m -> m.session
 
 updateSession : Model -> (Session -> Session) -> Model
@@ -55,7 +64,21 @@ updateSession model fn =
     case model of
         Home m -> Home (update_ m <| fn m.session)
         About m -> About (update_ m <| fn m.session)
+        Tools m -> Tools (update_ m <| fn m.session)
         NotFound m -> NotFound (update_ m <| fn m.session)
+
+viewPage : Model -> Html Msg
+viewPage model = 
+    let
+        map msg viewFn mod =
+            Html.map msg <|
+                viewFn mod
+    in
+    case model of
+        Home m -> map GotHomeMsg Home.view m
+        About m -> map GotAboutMsg About.view m
+        NotFound m -> map GotNotFoundMsg NotFound.view m
+        Tools m -> map GotToolsMsg Tools.view m
 
 -- INIT
 
@@ -64,7 +87,6 @@ init _ url key =
     let
         session = Session.init key url
         route = (Router.route url)
-
     in
     ( fromRoute route session, Cmd.none )
 
@@ -74,6 +96,8 @@ type Msg
     = GotHomeMsg Home.Msg
     | GotAboutMsg About.Msg
     | GotNotFoundMsg NotFound.Msg
+    | GotToolsMsg Tools.Msg
+    | SwitchTheme 
     | UrlRequested Browser.UrlRequest
     | UrlChanged Url.Url
 
@@ -101,6 +125,12 @@ update msg model =
                 (Cmd.map GotNotFoundMsg)
                 (NotFound.update subMsg subModel)
         
+        (Tools subModel, GotToolsMsg subMsg) ->
+            Tuple.mapBoth
+                Tools
+                (Cmd.map GotToolsMsg)
+                (Tools.update subMsg subModel)
+        
         (_, UrlRequested urlRequest) ->
             case urlRequest of
                 Browser.Internal url ->
@@ -124,6 +154,26 @@ update msg model =
             , Cmd.none
             )
 
+        (_, SwitchTheme) ->
+            let
+                session = toSession model
+                theme = session.theme
+                (cmd, newTheme) = 
+                    case theme of
+                        Theme.Dark -> 
+                            ( Ports.setTheme Theme.Light
+                            , Theme.Light
+                            )
+                        Theme.Light -> 
+                            ( Ports.setTheme Theme.Dark
+                            , Theme.Dark
+                            )
+
+            in
+            ( updateSession model (\s -> { s | theme = newTheme }), 
+              cmd
+            )
+
         _ ->
             ( model, Cmd.none )
 
@@ -139,6 +189,7 @@ header =
         links = 
             [ "Home"
             , "About"
+            , "Tools"
             ]
 
         -- Convert redirected url to query to 
@@ -148,8 +199,9 @@ header =
             List.map 
                 (\name ->
                     a 
-                        [ A.href ("?/" ++ String.toLower name) 
+                        [ A.href ("?page=" ++ String.toLower name) 
                         , A.class "nav-button"
+                        , A.id ("nav-" ++ String.toLower name)
                         ] 
                         [ text name 
                         ]
@@ -159,22 +211,13 @@ header =
         [ A.id "header" 
         ] 
         [ nav [ A.class "nav-list" ] buttons
+        -- , div [ A.class "spacer" ] []
+        , button [ A.id "theme-button", E.onClick SwitchTheme ] [ text "Switch Theme" ]
         ]
 
 -- VIEW
 
-viewPage : Model -> Html Msg
-viewPage model = 
-    case model of
-        Home m -> 
-            Html.map GotHomeMsg <|
-                Home.view m
-        About m -> 
-            Html.map GotAboutMsg <|
-                About.view m
-        NotFound m -> 
-            Html.map GotNotFoundMsg <|
-                NotFound.view m
+
 
 view : Model -> Browser.Document Msg
 view model =

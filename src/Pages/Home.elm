@@ -26,9 +26,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div 
-        [ A.style "display" "flex"
-        , A.style "flex-direction" "column"
+        [ A.class "home-container"
         ] 
         [ text "Home" 
-        , button [ E.onClick NoOp ] [ text "Test" ]
         ]
