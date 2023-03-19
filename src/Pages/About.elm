@@ -2,6 +2,7 @@ module Pages.About exposing (Model, Msg, init, update, view)
 
 import Session exposing (Session)
 import Html exposing (..)
+import Html.Attributes as A
 
 type alias Model =
     { session : Session
@@ -23,4 +24,4 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [] [ text "About" ]
+    div [ A.class "about-container" ] [ text "About" ]

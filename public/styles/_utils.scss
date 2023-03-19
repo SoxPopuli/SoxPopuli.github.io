@@ -14,3 +14,21 @@
         justify-content: center;
     }
 }
+
+@mixin button {
+    background-color: transparent;
+    color: white;
+    border: none;
+
+    &:hover { 
+        background-color: rgba($color: dimgrey, $alpha: 0.2) 
+    }
+    &:active { 
+        background-color: rgba($color: dimgrey, $alpha: 1.0); 
+    }
+}
+
+.flex-row { @include flex(row); }
+.flex-col { @include flex(column); }
+
+.spacer { flex-grow: 1; }
