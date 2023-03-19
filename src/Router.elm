@@ -14,6 +14,7 @@ type Route
 fromQuery : Maybe String -> Route
 fromQuery query =
     case query of
+        Nothing -> Home
         Just "home" -> Home
         Just "about" -> About
         Just "tools" -> Tools
@@ -24,7 +25,6 @@ parser : Parser.Parser (Route -> a) a
 parser =
     oneOf
         [ map fromQuery (Parser.top <?> Query.string "page")
-        , map Home Parser.top
         ]
 
 route : Url.Url -> Route
